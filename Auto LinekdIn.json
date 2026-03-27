@@ -1,0 +1,287 @@
+{
+  "name": "Auto LinekdIn",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -672,
+        -32
+      ],
+      "id": "f8560df3-baf6-47f3-ad8d-0e0dd1431ee5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -48,
+        -80
+      ],
+      "id": "aeb4b1e9-c20c-450c-8808-e169575efcb5",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a LinkedIn ghostwriter for a young professional \nbuilding a network in Tech, AI and Fintech.\n\nHere is an article:\nTitle: {{ $json.title }}\nContent: {{ $json.contentSnippet }}\n\nWrite a LinkedIn post based on this article following \nthese rules:\n\nTONE & STYLE:\n- Storytelling and personal — write like a real person \n  sharing a genuine insight, not a corporate press release\n- Casual but smart — think young professional who reads \n  a lot and has strong opinions\n- First person but never start with \"I\"\n- Bold and direct — no fluff, no filler sentences\n\nSTRUCTURE:\n- Line 1: A punchy hook that stops the scroll \n  (surprising stat, bold opinion, or contrarian take)\n- Lines 2-3: Brief personal angle or why this matters \n  to you\n- Bullet takeaways (3 max, each one punchy and specific)\n- Closing line: Your personal opinion on where this \n  is heading\n- End with 1 thought provoking question to spark \n  comments\n\nRULES:\n- Between 150-200 words maximum\n- No hashtags\n- No emojis\n- No generic phrases like \"In today's world\" or \n  \"It's no secret\"\n- Sound like a 22 year old who deeply understands \n  Tech, AI and Fintech — not a 50 year old consultant\n\nOnly output the LinkedIn post, nothing else.\n\nWrite a LinkedIn post based on this article that:\n- Starts with a strong hook (no \"I\" as the first word)\n- Has 3 key takeaways in short punchy sentences\n- Ends with a thought provoking question to drive comments\n- Uses line breaks for readability\n- Sounds professional but conversational\n- Is between 150-200 words\n- No hashtags\n\nOnly output the LinkedIn post, nothing else.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        304,
+        -64
+      ],
+      "id": "f233e8c4-760e-483b-a500-61f4fd55d516",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        304,
+        160
+      ],
+      "id": "abe21322-a0e2-4fd3-8af4-1995f19752d5",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "t3X0J4MX824VhdIM",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        128,
+        -64
+      ],
+      "id": "0ff9de95-45c8-464b-8ec5-ceb8f1f3b1d9",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "chatId": "=8510159286",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        816,
+        -64
+      ],
+      "id": "4fc3ce93-514b-45b1-8aaa-82be8e043aa7",
+      "name": "Send a text message",
+      "webhookId": "b362e690-727b-4b8f-9d7b-0f18b79af935",
+      "credentials": {
+        "telegramApi": {
+          "id": "gSsUbkWckq0aVv5g",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = [];\n\nfor (const item of $input.all()) {\n  const text = item.json.text;\n  \n  const cleaned = text\n    .replace(/[*_`\\[\\]()~>#+=|{}.!-]/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n  \n  items.push({ json: { text: cleaned } });\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -64
+      ],
+      "id": "d6e8d670-8a15-4d43-ab6a-38178c861649",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        -64
+      ],
+      "id": "0721823f-65ff-4b01-b44c-c9d4ba49988b",
+      "name": "TechCrunch"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/harvardbusiness",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        80
+      ],
+      "id": "1b1f0723-c409-4152-b639-7e763491b3a4",
+      "name": "Harvardbusiness"
+    },
+    {
+      "parameters": {
+        "url": "https://artificialintelligence-news.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        -240
+      ],
+      "id": "01db66ce-b4db-4573-913e-73ef1aed231f",
+      "name": "Ai News"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Ai News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TechCrunch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Harvardbusiness",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Harvardbusiness": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Ai News": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1fcb4b27-e4b4-4d87-865f-40cdf1711d01",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e50d76096a4ae8a3772f1bf2525a0a9bc42b6f217e1bf26fcf6e948f0d82735"
+  },
+  "id": "W4lfJN5Qfer2V0zX",
+  "tags": []
+}
